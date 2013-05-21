@@ -1,7 +1,7 @@
 // queue.js
 
 /***************************************************************************
- *   Copyright (C) 2012 Daniel Mueller (deso@posteo.net)                   *
+ *   Copyright (C) 2012-2013 Daniel Mueller (deso@posteo.net)              *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,8 +21,12 @@
  * @author Daniel Mueller
  * @date 06.05.2012
  *
- * This file contains a priority queue class. It maintains a sorted list of elements, the last of
- * which is the one that is smaller than all others (in term of some comparison function).
+ * This file contains a priority queue class. It is implemented as a
+ * binary heap using a user supplied comparison function for ordering
+ * elements. A special property useful for easing (and thereby speeding
+ * up) index calculations is leaving the first element of the array used
+ * for implementing the heap untouched such that the actual first heap
+ * element is located at index one.
  */
 
 
@@ -31,7 +35,7 @@
  */
 function Queue(compare)
 {
-  this.elements = [];
+  this.elements = [null];
   this.compare  = compare;
 }
 
@@ -40,9 +44,9 @@ function Queue(compare)
  */
 Queue.prototype.insert = function(element)
 {
-  var index = searchBinary(this.elements, element, this.compare);
-
-  this.elements.splice(index, 0, element);
+  var size = this.elements.length;
+  this.elements.push(element);
+  this.cascadeUp(size);
 }
 
 /**
@@ -50,9 +54,14 @@ Queue.prototype.insert = function(element)
  */
 Queue.prototype.pop = function()
 {
-  //DEBUG: assert(this.elements.length > 0);
+  //DEBUG: assert(this.elements.length > 1);
 
-  return this.elements.pop();
+  // The first element we are interested in is located at index 1; we
+  // replace it with the last element and then we cascade that down.
+  var value = this.elements[1];
+  this.elements[1] = this.elements.pop();
+  this.cascadeDown(1);
+  return value;
 }
 
 /**
@@ -60,43 +69,117 @@ Queue.prototype.pop = function()
  */
 Queue.prototype.isEmpty = function()
 {
-  return this.elements.length == 0;
+  //DEBUG: assert(this.elements.length >= 1);
+  return this.elements.length <= 1;
+}
+
+
+/**
+ * @param index (Number) index of element for which to calculate the
+ *        parent index
+ * @return (Number) index of parent element for element with given index
+ */
+function parentIndex(index)
+{
+  return Math.floor(index / 2);
 }
 
 /**
- * @param elements ([Object]) some array of objects
- * @param element (Object) some object
- * @param compare (Function) a comparison function taking two objects as parameters
- * @return (Number) index at which to insert the given element in order to preserve correct ordering
+ * @param index (Number) index of element for which to calculate the
+ *        left child index
+ * @return (Number) index of left child element for element with given
+ *         index
  */
-function searchBinary(elements, element, compare)
+function leftChildIndex(index)
 {
-  var begin = 0;
-  var end   = elements.length;
-  var i     = 0;
-  var j     = 0;
+  return index * 2;
+}
 
-  if (elements.length <= 0) {
-    return 0;
-  }
+/**
+ * @param index (Number) index of element for which to calculate the
+ *        right child index
+ * @return (Number) index of right child element for element with given
+ *         index
+ */
+function rightChildIndex(index)
+{
+  return index * 2 + 1;
+}
 
-  // only continue search if the area spans more than one entry
-  while (true) {
-    j = i;
-    i = Math.floor(begin + (end - begin) / 2);
+/**
+ * @param lhs (Number) index of first element
+ * @param rhs (Number) index of second element
+ * @return (Boolean) true if the first element is smaller than the last
+ *         one
+ */
+Queue.prototype.less = function(lhs, rhs)
+{
+  //DEBUG: assert(0 < lhs && lhs < this.elements.length);
+  //DEBUG: assert(0 < rhs && rhs < this.elements.length);
+  return this.compare(this.elements[lhs], this.elements[rhs]) < 0;
+}
 
-    var c = compare(element, elements[i]);
+/**
+ * @param lhs (Number) index of first object to swap with second
+ * @param rhs (Number) index of second object to swap with first
+ */
+Queue.prototype.swap = function(lhs, rhs)
+{
+  //DEBUG: assert(0 < lhs && lhs < this.elements.length);
+  //DEBUG: assert(0 < rhs && rhs < this.elements.length);
 
-    if (c > 0) {
-      begin = i;
-    } else if (c < 0) {
-      end = i;
+  var element = this.elements[lhs];
+  this.elements[lhs] = this.elements[rhs];
+  this.elements[rhs] = element;
+}
+
+/**
+ * @param index (Number) index of element to cascade up
+ */
+Queue.prototype.cascadeUp = function(index)
+{
+  //DEBUG: assert(0 < index && index < this.elements.length);
+
+  while (index > 1) {
+    var p = parentIndex(index);
+
+    if (this.less(index, p)) {
+      this.swap(index, p);
+      index = p;
     } else {
-      return i;
+      break;
+    }
+  }
+}
+
+/**
+ * @param index (Number)
+ */
+Queue.prototype.cascadeDown = function(index)
+{
+  var size = this.elements.length - 1;
+
+  while (true) {
+    var left_child  = leftChildIndex(index);
+    var right_child = rightChildIndex(index);
+    var min_child;
+
+    if (right_child <= size) {
+      // If the right child index is valid then the left child index is
+      // valid as well.
+      min_child = this.less(left_child, right_child)
+                ? left_child : right_child;
+    } else if (left_child <= size) {
+      min_child = left_child;
+    } else {
+      break;
     }
 
-    if (i == j) {
-      return c < 0 ? i : i + 1;
+    if (!this.less(index, min_child)) {
+      this.swap(min_child, index);
+      index = min_child;
+    } else {
+      break;
     }
   }
 }
