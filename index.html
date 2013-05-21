@@ -1,0 +1,128 @@
+<!--
+/***************************************************************************
+ *   Copyright (C) 2012 Daniel Mueller (deso@posteo.net)                   *
+ *                                                                         *
+ *   This program is free software: you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation, either version 3 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
+ ***************************************************************************/
+-->
+
+<html>
+  <head>
+    <title>Delaunay Triangulation</title>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+    <script type="text/javascript" src="point.js"></script>
+    <script type="text/javascript" src="queue.js"></script>
+    <script type="text/javascript" src="triangle.js"></script>
+    <script type="text/javascript" src="triangulation.js"></script>
+
+    <script type="text/javascript">
+      var delaunay_ = new Delaunay(0, 640, 0, 480);
+
+      function getCanvas() {
+        return document.getElementById("canvas");
+      }
+
+      function isCircumcircle() {
+        return document.getElementById('circumcircle').checked;
+      }
+
+      function onCircumcircleChange() {
+        drawTriangles();
+      }
+
+      function onClick(event) {
+        var x;
+        var y;
+
+        if (event.clientX != null && event.clientY != null) {
+          x = event.clientX;
+          y = event.clientY;
+        } else if (event.layerX != null && event.layerY != null) {
+          x = event.layerX;
+          y = event.layerY;
+        } else if (event.offsetX != null && event.offsetY != null) {
+          x = event.offsetX;
+          y = event.offsetY;
+        } else if (event.pageX != null && event.pageY != null) {
+          x = event.pageX;
+          y = event.pageY;
+        } else if (event.screenX != null && event.screenY != null) {
+          x = event.screenX;
+          y = event.screenY;
+        } else if (event.x != null && event.y != null) {
+          x = event.x;
+          y = event.y;
+        }
+
+        x -= getCanvas().offsetLeft;
+        y -= getCanvas().offsetTop;
+
+        delaunay_.insert([new Point(x, y, 0.0)]);
+        drawTriangles();
+      }
+
+      function drawTriangles() {
+        var canvas    = getCanvas();
+        var context   = canvas.getContext("2d");
+        var triangles = delaunay_.getTriangles();
+
+        context.fillStyle = "rgb(0, 0, 0)";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.lineWidth   = 1;
+        context.fillStyle   = "rgb(200, 200, 200)";
+        context.strokeStyle = "rgb(0,   200, 0)";
+
+        for (var i = 0; i < triangles.length; i++) {
+          var triangle = triangles[i];
+
+          context.beginPath();
+          context.moveTo(triangle.points[0].x, triangle.points[0].y);
+          context.lineTo(triangle.points[1].x, triangle.points[1].y);
+          context.lineTo(triangle.points[2].x, triangle.points[2].y);
+          context.closePath();
+          context.fill();
+        }
+
+        context.lineWidth   = 1;
+        context.strokeStyle = "rgb(255, 0, 0)";
+
+        if (isCircumcircle()) {
+          for (var i = 0; i < triangles.length; i++) {
+            var triangle     = triangles[i];
+            var circumcenter = triangle.getCircumcenter();
+            var radius       = Math.sqrt(triangle.getRadius());
+
+            context.beginPath();
+            context.arc(circumcenter.x, circumcenter.y, radius, 0, 2*Math.PI, false);
+            context.closePath();
+            context.stroke();
+          }
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <input type="checkbox" id="circumcircle" name="circumcircle" value="circumcircle" />circumcircle<br />
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <script type="text/javascript">
+      document.getElementById("canvas").addEventListener('click', onClick, false);
+      document.getElementById('circumcircle').addEventListener('change', onCircumcircleChange, false);
+
+      drawTriangles();
+    </script>
+  </body>
+</html>
