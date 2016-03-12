@@ -1,0 +1,17 @@
+/* The canvas ID. */
+#canvas {
+  background: #f0f0f0;
+}
+/* The circumCircle class. */
+.triangle {
+  background-color: #c8c8c8;
+  color: #000000;
+  width: 2;
+  display: none;
+}
+/* The circumCircle class. */
+.circumCircle {
+  color: #f00000;
+  width: 1;
+  display: none;
+}

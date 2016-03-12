@@ -21,6 +21,7 @@
   <head>
     <title>Delaunay Triangulation</title>
     <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
     <script type="text/javascript" src="point.js"></script>
     <script type="text/javascript" src="queue.js"></script>
@@ -29,6 +30,32 @@
 
     <script type="text/javascript">
       var delaunay_ = new Delaunay(0, 640, 0, 480);
+
+      function elementStyle(element) {
+        var objct = document.getElementById(element);
+        var style = document.defaultView.getComputedStyle(objct, null);
+        return style;
+      }
+
+      function triangleColor() {
+        return elementStyle("triangleStyle").getPropertyValue("background-color")
+      }
+
+      function triangleLineColor() {
+        return elementStyle("triangleStyle").color
+      }
+
+      function triangleLineWidth() {
+        return parseInt(elementStyle("triangleStyle").width)
+      }
+
+      function circumCircleLineColor() {
+        return elementStyle("circumCircleStyle").color
+      }
+
+      function circumCircleLineWidth() {
+        return parseInt(elementStyle("circumCircleStyle").width)
+      }
 
       function getCanvas() {
         return document.getElementById("canvas");
@@ -78,12 +105,9 @@
         var context   = canvas.getContext("2d");
         var triangles = delaunay_.getTriangles();
 
-        context.fillStyle = "rgb(0, 0, 0)";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        context.lineWidth   = 1;
-        context.fillStyle   = "rgb(200, 200, 200)";
-        context.strokeStyle = "rgb(0,   200, 0)";
+        context.lineWidth   = triangleLineWidth();
+        context.fillStyle   = triangleColor();
+        context.strokeStyle = triangleLineColor();
 
         for (var i = 0; i < triangles.length; i++) {
           var triangle = triangles[i];
@@ -97,8 +121,8 @@
           context.fill();
         }
 
-        context.lineWidth   = 1;
-        context.strokeStyle = "rgb(255, 0, 0)";
+        context.lineWidth   = circumCircleLineWidth();
+        context.strokeStyle = circumCircleLineColor();
 
         if (isCircumcircle()) {
           for (var i = 0; i < triangles.length; i++) {
@@ -116,6 +140,12 @@
     </script>
   </head>
   <body>
+    <!--
+      Define an object with the triangle style in order to be able to
+      query this style from javascript.
+    -->
+    <div id="triangleStyle" class="triangle"></div>
+    <div id="circumCircleStyle" class="circumCircle"></div>
     <input type="checkbox" id="circumcircle" name="circumcircle" value="circumcircle" />circumcircle<br />
     <canvas id="canvas" width="640" height="480"></canvas>
 
