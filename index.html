@@ -1,6 +1,6 @@
 <!--
 /***************************************************************************
- *   Copyright (C) 2012 Daniel Mueller (deso@posteo.net)                   *
+ *   Copyright (C) 2017 Daniel Mueller (deso@posteo.net)                   *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -105,6 +105,7 @@
         var context   = canvas.getContext("2d");
         var triangles = delaunay_.getTriangles();
 
+        context.clearRect(0, 0, canvas.width, canvas.height);
         context.lineWidth   = triangleLineWidth();
         context.fillStyle   = triangleColor();
         context.strokeStyle = triangleLineColor();
