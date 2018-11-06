@@ -36,5 +36,5 @@ The Algorithm
 
 
 [delaunay]: https://en.wikipedia.org/wiki/Delaunay_triangulation
-[applet]: https://rawgit.com/d-e-s-o/delaunay-triangulation/master/index.html
+[applet]: https://d-e-s-o.github.io/delaunay-triangulation
 [bowyer]: https://doi.org/10.1093/comjnl/24.2.162
