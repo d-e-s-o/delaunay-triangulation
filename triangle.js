@@ -1,7 +1,7 @@
 // triangle.js
 
 /***************************************************************************
- *   Copyright (C) 2012 Daniel Mueller (deso@posteo.net)                   *
+ *   Copyright (C) 2012-2024 Daniel Mueller (deso@posteo.net)              *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -179,6 +179,14 @@ function calculateCircumcentre(points)
   // r^2  = (x1 - u)^2 + (y1 - v)^2
   // r^2  = (x2 - u)^2 + (y2 - v)^2
   // r^2  = (x3 - u)^2 + (y3 - v)^2
+  //
+  // (%i1) expand(solve([r^2=(x1-u)^2+(y1-v)^2, r^2=(x2-u)^2+(y2-v)^2, r^2=(x3-u)^2+(y3-v)^2], [u, v, r]));
+  //
+  // Use grind(%o) or string(%o) to make result somewhat more appealing
+  // to our use case. Squares can be eliminated via:
+  //
+  //   s@\([a-z0-9]\+\)\^2@(\1*\1)@g
+
   var u = -((y2-y1)*(y3*y3)+(-(y2*y2)+(y1*y1)-(x2*x2)+(x1*x1))*y3+y1*(y2*y2)+(-(y1*y1)+(x3*x3)-(x1*x1))*y2+((x2*x2)-(x3*x3))*y1)/((2*x2-2*x1)*y3+(2*x1-2*x3)*y2+(2*x3-2*x2)*y1);
   var v =  ((x2-x1)*(y3*y3)+(x1-x3)*(y2*y2)+(x3-x2)*(y1*y1)+(x2-x1)*(x3*x3)+((x1*x1)-(x2*x2))*x3+x1*(x2*x2)-(x1*x1)*x2)/((2*x2-2*x1)*y3+(2*x1-2*x3)*y2+(2*x3-2*x2)*y1);
 
